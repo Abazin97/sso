@@ -1,6 +1,6 @@
 env: "local"
 storage_path: "./storage/sso.db"
-token_ttl: 1h
+token_ttl: 15m
 
 grpc:
   port: 44084

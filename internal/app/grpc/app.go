@@ -7,6 +7,7 @@ import (
 	authgrpc "sso/internal/grpc/auth"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type App struct {
@@ -20,7 +21,15 @@ func New(
 	port int,
 	authService authgrpc.Auth,
 ) *App {
-	gRPCServer := grpc.NewServer()
+	creds, err := credentials.NewServerTLSFromFile(
+		"certs/server.crt",
+		"certs/server.key")
+
+	if err != nil {
+		log.Info(err.Error())
+	}
+	gRPCServer := grpc.NewServer(
+		grpc.Creds(creds))
 	authgrpc.Register(gRPCServer, authService)
 
 	return &App{

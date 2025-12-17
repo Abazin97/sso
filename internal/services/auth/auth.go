@@ -86,7 +86,7 @@ func New(
 
 // Login checks if user with given credentials exists in the system and returns access token.
 //
-// If user exists, but password is incorrect, returns error. If user doesn`t exist, returns error.
+// If user exists, but password is incorrect, returns error. If user doesn’t exist, returns error.
 func (a *Auth) Login(
 	ctx context.Context,
 	email string,
@@ -226,7 +226,6 @@ func (a *Auth) ChangePasswordInit(ctx context.Context, email string, phone strin
 	log := a.log.With(
 		slog.String("op", op),
 		slog.String("email", email),
-		slog.String("oldPass", oldPassword),
 	)
 
 	log.Info("getting user...")
@@ -251,7 +250,6 @@ func (a *Auth) ChangePasswordInit(ctx context.Context, email string, phone strin
 
 	verificationCode := a.otpGenerator.RandomSecret(a.verificationCodeLength)
 
-	// todo: implement id:verification_code scheme for init & save in redis
 	id, err := a.repo.SaveCode(ctx, verificationCode)
 	if err != nil {
 		a.log.Error("failed to save verification code", sl.Err(err))
@@ -259,9 +257,8 @@ func (a *Auth) ChangePasswordInit(ctx context.Context, email string, phone strin
 
 	log.Info("code saved in redis")
 
-	// todo: make timer for code lifetime
+	// todo: make ttl for code lifetime
 
-	//todo: impelement sending of verification code
 	err = a.emailService.SendVerificationEmail(services.VerificationEmailInput{
 		Email:            email,
 		Name:             user.Name,
@@ -281,12 +278,10 @@ func (a *Auth) ChangePasswordConfirm(ctx context.Context, verificationCode strin
 
 	log := a.log.With(
 		slog.String("op", op),
-		slog.String("verificationCode", verificationCode),
-		slog.Int64("expiryTime", uid))
+	)
 
 	log.Info("comparing verification code")
 
-	// todo: implement code hash comparing
 	code, err := a.repo.Code(ctx, uid)
 	if err != nil {
 		if errors.Is(err, repository.ErrCodeNotFound) {
