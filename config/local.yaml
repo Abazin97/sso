@@ -1,0 +1,25 @@
+env: "local"
+storage_path: "./storage/sso.db"
+token_ttl: 1h
+
+grpc:
+  port: 44084
+  timeout: 1h
+
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  from: "abazin707@gmail.com"
+  pass: "${pass}"
+  verification_code_length: 6
+
+redis:
+  host: "127.0.0.1"
+  port: 6379
+
+email:
+  templates:
+    verification_email: "./templates/verification_email.html"
+    verification_info: "Verification Code"
+
+migrations_path: "./migrations"
