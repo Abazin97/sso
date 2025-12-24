@@ -93,7 +93,7 @@ func (a *Auth) Login(
 	password string,
 	phone string,
 	appID int,
-) (string, error) {
+) (models.User, string, error) {
 	const op = "auth.Login"
 
 	log := a.log.With(
@@ -108,41 +108,39 @@ func (a *Auth) Login(
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
 			a.log.Warn("user not found", sl.Err(err))
-			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+			return models.User{}, "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 
 		a.log.Error("failed to get user", sl.Err(err))
 
-		return "", fmt.Errorf("%s: %w", op, err)
+		return models.User{}, "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.PassHash, []byte(password)); err != nil {
 		a.log.Info("invalid credentials", sl.Err(err))
-		return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
+		return models.User{}, "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 	}
 
 	app, err := a.appProvider.App(ctx, appID)
 	if err != nil {
 		if errors.Is(err, repository.ErrAppNotFound) {
 			a.log.Warn("app not found", sl.Err(err))
-			return "", fmt.Errorf("%s: %w", op, ErrInvalidAppID)
+			return models.User{}, "", fmt.Errorf("%s: %w", op, ErrInvalidAppID)
 		}
-		return "", fmt.Errorf("%s: %w", op, err)
+		return models.User{}, "", fmt.Errorf("%s: %w", op, err)
 	}
 
 	log.Info("user logged in succesfully")
 
 	token, err := jwt.NewToken(user, app, a.tokenTTL)
 
-	//log.Info(token)
-
 	if err != nil {
 		a.log.Error("failed to generate token", sl.Err(err))
 
-		return "", fmt.Errorf("%s: %w", op, err)
+		return models.User{}, "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	return token, nil
+	return user, token, nil
 }
 
 // RegisterNewUser registers new user in the system and returns user ID.

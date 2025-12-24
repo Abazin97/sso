@@ -1,8 +1,12 @@
 github.com/Abazin97/protos v0.1.4 h1:Pm4h19uK2ijUJ/eoV7nvau3sdOtLbgSBwwnts5j4pBY=
 github.com/Abazin97/protos v0.1.4/go.mod h1:zVMpmN3Gh5cMjjaDRotgl/RPUcoBlCYJVUu2sjkuh68=
+github.com/Abazin97/protos v0.1.5 h1:zwhmm8Eg7KU24YR6sjcObiZh1k0K+G/ps2hznr2sAFs=
+github.com/Abazin97/protos v0.1.5/go.mod h1:zVMpmN3Gh5cMjjaDRotgl/RPUcoBlCYJVUu2sjkuh68=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/BurntSushi/toml v1.5.0 h1:W5quZX/G/csjUnuI8SUYlsHs9M38FC7znL0lIO+DvMg=
 github.com/BurntSushi/toml v1.5.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
+github.com/BurntSushi/toml v1.6.0 h1:dRaEfpa2VI55EwlIW72hMRHdWouJeRF7TPYhI+AUQjk=
+github.com/BurntSushi/toml v1.6.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=

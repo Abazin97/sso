@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"sso/internal/domain/models"
 	"sso/internal/repository"
 	"sso/internal/services/auth"
 
@@ -18,7 +19,7 @@ type Auth interface {
 		password string,
 		phone string,
 		appID int,
-	) (token string, err error)
+	) (models.User, string, error)
 	RegisterNewUser(ctx context.Context,
 		title string,
 		birthDate string,
@@ -41,8 +42,6 @@ type Auth interface {
 		email string,
 		newPassword string,
 	) (bool, error)
-	//RequestOTP(phone string) (string, error)
-	//VerifyOTP(phone string, code string) error
 }
 
 type serverAPI struct {
@@ -67,7 +66,7 @@ func (s *serverAPI) Login(
 		return nil, err
 	}
 
-	token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), req.GetPhone(), int(req.GetAppId()))
+	user, token, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), req.GetPhone(), int(req.GetAppId()))
 	if err != nil {
 		if errors.Is(err, auth.ErrInvalidCredentials) {
 			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
@@ -79,6 +78,7 @@ func (s *serverAPI) Login(
 	}
 
 	return &ssov1.LoginResponse{
+		User:  ToProtoUser(user),
 		Token: token,
 	}, nil
 }
