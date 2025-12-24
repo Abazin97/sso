@@ -45,8 +45,9 @@ type EmailTemplate struct {
 }
 
 type RedisConfig struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	Host        string        `yaml:"host"`
+	Port        int           `yaml:"port"`
+	VerTokenTTL time.Duration `yaml:"token_ttl" env-default:"5m"`
 }
 
 func MustLoad() *Config {

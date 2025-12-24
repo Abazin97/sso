@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/44465c9b-a0d5-478b-a1a3-b5dbbe62197c/console.sql" value="44465c9b-a0d5-478b-a1a3-b5dbbe62197c" />
     <file url="file://$PROJECT_DIR$/migrations/1_init.up.sql" value="44465c9b-a0d5-478b-a1a3-b5dbbe62197c" />
     <file url="file://$PROJECT_DIR$/migrations/2_add_is_admin_to_users_tbl.down.sql" value="44465c9b-a0d5-478b-a1a3-b5dbbe62197c" />
     <file url="file://$PROJECT_DIR$/migrations/2_add_is_admin_to_users_tbl.up.sql" value="44465c9b-a0d5-478b-a1a3-b5dbbe62197c" />

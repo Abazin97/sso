@@ -14,6 +14,6 @@ var (
 )
 
 type Redis interface {
-	SaveCode(ctx context.Context, code string) (int64, error)
+	SaveCode(ctx context.Context, code string, uid int64) error
 	Code(ctx context.Context, uid int64) (models.Code, error)
 }

@@ -248,7 +248,9 @@ func (a *Auth) ChangePasswordInit(ctx context.Context, email string, phone strin
 
 	verificationCode := a.otpGenerator.RandomSecret(a.verificationCodeLength)
 
-	id, err := a.repo.SaveCode(ctx, verificationCode)
+	uid := user.ID
+	a.log.Info("uid:", slog.Int64("uid", uid))
+	err = a.repo.SaveCode(ctx, verificationCode, uid)
 	if err != nil {
 		a.log.Error("failed to save verification code", sl.Err(err))
 	}
@@ -268,7 +270,7 @@ func (a *Auth) ChangePasswordInit(ctx context.Context, email string, phone strin
 
 	log.Info("email has sent")
 
-	return "", id, nil
+	return "", uid, nil
 }
 
 func (a *Auth) ChangePasswordConfirm(ctx context.Context, verificationCode string, uid int64, email string, newPassword string) (bool, error) {
