@@ -23,7 +23,7 @@ func main() {
 
 	log.Info("starting app", slog.Any("config", cfg))
 
-	application := app.New(log, cfg, cfg.GRPC.Port, cfg.SMTP.Port, cfg.SMTP.From, cfg.SMTP.Pass, cfg.SMTP.Host, cfg.StoragePath, cfg.TokenTTL, cfg.SMTP.VerificationCodeLength, cfg.Redis)
+	application := app.New(log, cfg, cfg.GRPC.Port, cfg.SMTP.Port, cfg.SMTP.From, cfg.SMTP.Pass, cfg.SMTP.Host, cfg.StoragePath, cfg.TokenTTL, cfg.SMTP.VerificationCodeLength, cfg.Redis, cfg.Redis.VerTokenTTL)
 
 	go application.GRPCSrv.MustRun()
 

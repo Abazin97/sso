@@ -26,6 +26,7 @@ type Auth struct {
 	otpGenerator           otp.Generator
 	verificationCodeLength int
 	repo                   repository.Redis
+	verCodeTTL             time.Duration
 }
 
 type UserSaver interface {
@@ -70,6 +71,7 @@ func New(
 	otpGenerator otp.Generator,
 	verificationCodeLength int,
 	repo repository.Redis,
+	verCodeTTL time.Duration,
 ) *Auth {
 	return &Auth{
 		usrSaver:               userSaver,
@@ -81,6 +83,7 @@ func New(
 		otpGenerator:           otpGenerator,
 		verificationCodeLength: verificationCodeLength,
 		repo:                   repo,
+		verCodeTTL:             verCodeTTL,
 	}
 }
 
@@ -257,7 +260,8 @@ func (a *Auth) ChangePasswordInit(ctx context.Context, email string, phone strin
 
 	log.Info("code saved in redis")
 
-	// todo: make ttl for code lifetime
+	redisTTL := a.verCodeTTL
+	expiresAt := time.Now().UTC().Add(redisTTL).Format(time.RFC3339)
 
 	err = a.emailService.SendVerificationEmail(services.VerificationEmailInput{
 		Email:            email,
@@ -270,7 +274,7 @@ func (a *Auth) ChangePasswordInit(ctx context.Context, email string, phone strin
 
 	log.Info("email has sent")
 
-	return "", uid, nil
+	return expiresAt, uid, nil
 }
 
 func (a *Auth) ChangePasswordConfirm(ctx context.Context, verificationCode string, uid int64, email string, newPassword string) (bool, error) {
@@ -318,51 +322,3 @@ func (a *Auth) ChangePasswordConfirm(ctx context.Context, verificationCode strin
 
 	return success, nil
 }
-
-//func (a *Auth) RequestOTP(phone string) (respID string, err error) {
-//	const op = "auth.requestOTP"
-//
-//	log := a.log.With(
-//		slog.String("op", op),
-//	)
-//
-//	log.Info("requesting OTP")
-//
-//	params := &twilioAPI.CreateVerificationParams{}
-//	params.SetTo(phone)
-//	params.SetChannel("sms")
-//
-//	resp, err := ClientParam.VerifyV2.CreateVerification(os.Getenv(""), params)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	return *resp.Sid, nil
-//}
-//
-//func (a *Auth) VerifyOTP(phone string, code string) error {
-//	const op = "auth.VerifyOTP"
-//
-//	log := a.log.With(
-//		slog.String("op", op),
-//	)
-//
-//	log.Info("verifying OTP")
-//
-//	params := &twilioAPI.CreateVerificationCheckParams{}
-//	params.SetTo(phone)
-//	params.SetCode(code)
-//
-//	resp, err := ClientParam.VerifyV2.CreateVerificationCheck(os.Getenv(""), params)
-//	if err != nil {
-//		return fmt.Errorf("%s: %w", op, err)
-//	}
-//
-//	if *resp.Status != "approved" {
-//		return fmt.Errorf("%s: %w", op, ErrNotValidCode)
-//	}
-//
-//	log.Info("verified OTP")
-//
-//	return nil
-//}

@@ -29,6 +29,7 @@ func New(
 	tokenTTL time.Duration,
 	verificationCodeLength int,
 	redisHost config.RedisConfig,
+	verificationCodeTTL time.Duration,
 ) *App {
 	storage, err := sqlite.New(storagePath)
 	if err != nil {
@@ -60,7 +61,8 @@ func New(
 		emails,
 		otpGenerator,
 		verificationCodeLength,
-		redisRepo)
+		redisRepo,
+		verificationCodeTTL)
 
 	grpcApp := grpcapp.New(log, grpcPort, authService)
 
