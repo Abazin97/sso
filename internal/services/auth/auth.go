@@ -210,7 +210,7 @@ func (a *Auth) IsAdmin(ctx context.Context,
 
 	isAdmin, err := a.usrProvider.IsAdmin(ctx, userID)
 	if err != nil {
-		if errors.Is(err, repository.ErrAppNotFound) {
+		if errors.Is(err, repository.ErrUserNotFound) {
 			log.Warn("user not found")
 		}
 		return false, fmt.Errorf("%s: %w", op, ErrInvalidAppID)
@@ -252,7 +252,7 @@ func (a *Auth) ChangePasswordInit(ctx context.Context, email string, phone strin
 	verificationCode := a.otpGenerator.RandomSecret(a.verificationCodeLength)
 
 	uid := user.ID
-	a.log.Info("uid:", slog.Int64("uid", uid))
+	//a.log.Info("uid:", slog.Int64("uid", uid))
 	err = a.repo.SaveCode(ctx, verificationCode, uid)
 	if err != nil {
 		a.log.Error("failed to save verification code", sl.Err(err))
@@ -262,6 +262,7 @@ func (a *Auth) ChangePasswordInit(ctx context.Context, email string, phone strin
 
 	redisTTL := a.verCodeTTL
 	expiresAt := time.Now().UTC().Add(redisTTL).Format(time.RFC3339)
+	//log.Info("expires at:", expiresAt)
 
 	err = a.emailService.SendVerificationEmail(services.VerificationEmailInput{
 		Email:            email,
@@ -289,11 +290,11 @@ func (a *Auth) ChangePasswordConfirm(ctx context.Context, verificationCode strin
 	code, err := a.repo.Code(ctx, uid)
 	if err != nil {
 		if errors.Is(err, repository.ErrCodeNotFound) {
-			a.log.Warn("user not found", sl.Err(err))
+			a.log.Warn("invalid verification code", sl.Err(err))
 			return false, fmt.Errorf("%s: %w", op, ErrInvalidCredentials)
 		}
 
-		a.log.Error("failed to get user", sl.Err(err))
+		a.log.Error("failed to get code", sl.Err(err))
 
 		return false, fmt.Errorf("%s: %w", op, err)
 	}

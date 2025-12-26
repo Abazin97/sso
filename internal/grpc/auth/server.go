@@ -140,13 +140,16 @@ func (s *serverAPI) ChangePasswordInit(
 	ctx context.Context,
 	req *ssov1.ChangePassInitRequest) (*ssov1.ChangePassInitResponse, error) {
 
-	code, verID, err := s.auth.ChangePasswordInit(ctx, req.GetEmail(), req.GetPhone(), req.GetOldPassword())
+	expTime, verID, err := s.auth.ChangePasswordInit(ctx, req.GetEmail(), req.GetPhone(), req.GetOldPassword())
 
 	if err != nil {
+		if errors.Is(err, auth.ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, "user not found")
+		}
 		return nil, status.Error(codes.Internal, "failed to change password")
 	}
 
-	return &ssov1.ChangePassInitResponse{Uid: verID, Code: code}, nil
+	return &ssov1.ChangePassInitResponse{ExpiryTime: expTime, Uid: verID}, nil
 }
 
 func (s *serverAPI) ChangePasswordConfirm(
