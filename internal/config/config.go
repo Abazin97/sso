@@ -14,6 +14,7 @@ type Config struct {
 	StoragePath    string        `yaml:"storage_path" env-required:"true"`
 	TokenTTL       time.Duration `yaml:"token_ttl" env-default:"1h"`
 	GRPC           GRPCConfig    `yaml:"grpc"`
+	App            AppConfig     `yaml:"app"`
 	SMTP           SMTPConfig    `yaml:"smtp"`
 	Email          EmailConfig   `yaml:"email"`
 	Redis          RedisConfig   `yaml:"redis"`
@@ -23,6 +24,12 @@ type Config struct {
 type GRPCConfig struct {
 	Port    int           `yaml:"port"`
 	Timeout time.Duration `yaml:"timeout"`
+}
+
+type AppConfig struct {
+	AppID     int    `yaml:"id"`
+	AppName   string `yaml:"name"`
+	AppSecret string `env:"secret"`
 }
 
 type SMTPConfig struct {

@@ -133,8 +133,6 @@ func (a *Auth) Login(
 		return models.User{}, "", fmt.Errorf("%s: %w", op, err)
 	}
 
-	log.Info("user logged in succesfully")
-
 	token, err := jwt.NewToken(user, app, a.tokenTTL)
 
 	if err != nil {
@@ -142,6 +140,7 @@ func (a *Auth) Login(
 
 		return models.User{}, "", fmt.Errorf("%s: %w", op, err)
 	}
+	log.Info("user logged in succesfully")
 
 	return user, token, nil
 }
@@ -161,16 +160,12 @@ func (a *Auth) RegisterNewUser(ctx context.Context,
 
 	log := a.log.With(
 		slog.String("op", op),
-		slog.String("title", title),
-		slog.String("birth_date", birthDate),
-		slog.String("name", name),
-		slog.String("last_name", lastName),
 		slog.String("email", email),
-		slog.String("phone", phone),
 	)
 
 	log.Info("registering user")
 
+	// todo: add salt into password
 	passHash, err := bcrypt.GenerateFromPassword([]byte(pass), bcrypt.DefaultCost)
 	if err != nil {
 		log.Error("failed to generate password hash", sl.Err(err))

@@ -31,6 +31,54 @@ func (s *Repository) Stop() error {
 	return s.db.Close()
 }
 
+func (s *Repository) CreateApp(
+	ctx context.Context,
+	name string,
+	secret []byte,
+) (int, error) {
+	const op = "repository.sqlite.CreateApp"
+
+	stmt, err := s.db.Prepare(`INSERT INTO apps (name, secret) VALUES (?, ?)`)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	res, err := stmt.ExecContext(ctx, name, secret)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return int(id), nil
+}
+
+func (s *Repository) UpdateApp(
+	ctx context.Context,
+	id int,
+	name string,
+	secret []byte,
+) error {
+	const op = "repository.sqlite.UpdateApp"
+
+	_, err := s.db.ExecContext(
+		ctx,
+		`UPDATE apps SET name = ?, secret = ? WHERE id = ?`,
+		name,
+		secret,
+		id,
+	)
+
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
+}
+
 // SaveUser saves user to db.
 func (s *Repository) SaveUser(ctx context.Context, title string, birthDate string, name string, lastName string, email string, passHash []byte, phone string) (int64, error) {
 	const op = "repository.sqlite.SaveUser"
@@ -103,6 +151,8 @@ func (s *Repository) SetPassword(ctx context.Context, email string, newPassword 
 	return true, nil
 }
 
+// todo: rearrange db structure,taking isAdmin field out of users column when selecting rights
+
 func (s *Repository) IsAdmin(ctx context.Context, userID int64) (bool, error) {
 	const op = "repository.sqlite.IsAdmin"
 
@@ -135,10 +185,10 @@ func (s *Repository) App(ctx context.Context, id int) (models.App, error) {
 	row := stmt.QueryRowContext(ctx, id)
 
 	var app models.App
-	err = row.Scan(&app.ID, &app.Name, &app.Secret)
+	err = row.Scan(&app.ID, &app.Name, &app.SecretHash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return models.App{}, fmt.Errorf("%s: %w", op, repository.ErrUserNotFound)
+			return models.App{}, fmt.Errorf("%s: %w", op, repository.ErrAppNotFound)
 		}
 
 		return models.App{}, fmt.Errorf("%s: %w", op, err)

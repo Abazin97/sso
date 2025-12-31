@@ -67,5 +67,3 @@ func (s *Repository) Code(ctx context.Context, id int64) (models.Code, error) {
 		Code:   code,
 	}, nil
 }
-
-// todo: code deletion after 5 mins of issuing

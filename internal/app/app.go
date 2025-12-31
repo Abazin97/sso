@@ -1,9 +1,12 @@
 package app
 
 import (
+	"context"
 	"log/slog"
 	grpcapp "sso/internal/app/grpc"
+	"sso/internal/bootstrap"
 	"sso/internal/config"
+	"sso/internal/lib/logger/sl"
 	"sso/internal/otp"
 	"sso/internal/repository/redis"
 	"sso/internal/repository/sqlite"
@@ -26,6 +29,9 @@ func New(
 	pass string,
 	host string,
 	storagePath string,
+	appID int,
+	appName string,
+	appSecret string,
 	tokenTTL time.Duration,
 	verificationCodeLength int,
 	redisHost config.RedisConfig,
@@ -35,6 +41,18 @@ func New(
 	if err != nil {
 		log.Error("sqlite unavailable")
 	}
+
+	if err := bootstrap.InitApp(
+		context.Background(),
+		log,
+		storage,
+		appID,
+		appName,
+		appSecret,
+	); err != nil {
+		log.Error("failed to init app", sl.Err(err))
+	}
+
 	smtpService, err := smtp.NewSMTPService(from, pass, host, smtpPort)
 	if err != nil {
 		log.Error("smtp unavailable")

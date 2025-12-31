@@ -1,6 +1,26 @@
 env: "prod"
 storage_path: "/root/apps/grpc-auth/sso.db"
+token_ttl: 15m
+
 grpc:
   port: 44084
   timeout: 5s
+
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  from: "abazin707@gmail.com"
+  pass: "${pass}"
+  verification_code_length: 6
+
+redis:
+  host: "127.0.0.1"
+  port: 6379
+  ver_token_tt: 5m
+
+email:
+  templates:
+    verification_email: "./templates/verification_email.html"
+    verification_info: "Verification Code"
+
 migrations_path: "./migrations"
