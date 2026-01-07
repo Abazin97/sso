@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HOST: abz@46.242.77.215
-      DEPLOY_DIRECTORY: /root/apps/grpc-auth
-      CONFIG_PATH: /root/apps/grpc-auth/config/prod.yaml
+      DEPLOY_DIRECTORY: /home/abz/apps/grpc-auth
+      CONFIG_PATH: /home/abz/apps/grpc-auth/config/prod.yaml
       SSH_PORT: 34159
 
     steps:
@@ -61,7 +61,7 @@ jobs:
           "
       - name: Remove old systemd service file
         run: |
-          ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "rm -f /etc/systemd/system/grpc-auth.service"
+          ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "sudo rm -f /etc/systemd/system/grpc-auth.service"
       - name: List workspace contents
         run: |
           echo "Listing deployment folder contents:"
@@ -69,10 +69,10 @@ jobs:
       - name: Copy systemd service file
         run: |
           scp -i grpc-auth.pem -P ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ github.workspace }}/deployment/grpc-auth.service ${{ env.HOST }}:/tmp/grpc-auth.service
-          ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "mv /tmp/grpc-auth.service /etc/systemd/system/grpc-auth.service"
+          ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "sudo mv /tmp/grpc-auth.service /etc/systemd/system/grpc-auth.service"
       - name: Run migrations
         run: |
           ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "${{ env.DEPLOY_DIRECTORY }}/migrator --storage-path=${{ env.DEPLOY_DIRECTORY }}/sso.db --migrations-path=${{ env.DEPLOY_DIRECTORY }}/migrations"
       - name: Start application
         run: |
-          ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "systemctl daemon-reload && systemctl restart grpc-auth.service"
+          ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "sudo systemctl daemon-reload && systemctl restart grpc-auth.service"
