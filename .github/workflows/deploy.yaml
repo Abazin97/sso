@@ -46,7 +46,7 @@ jobs:
         run: |
           sudo apt-get install -y ssh rsync
           echo "$DEPLOY_SSH_KEY" > grpc-auth
-          chmod 600 grpc-auth.pem
+          chmod 600 grpc-auth
           ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
           rsync -avz -e 'ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no' --exclude='.git' ./ ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}
           rsync -avz -e 'ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no' ./migrator ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}/migrator
