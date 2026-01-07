@@ -6,6 +6,11 @@ grpc:
   port: 44084
   timeout: 5s
 
+app:
+  id: 1
+  name: "grpc-app"
+  secret: "${secret}"
+
 smtp:
   host: "smtp.gmail.com"
   port: 587

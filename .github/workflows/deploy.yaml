@@ -31,6 +31,9 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.24.0
+#      - name: Generate .env file
+#        run: |
+#          ssh -i deploy_key.pem -o StrictHostKeyChecking=no -p ${{ env.PORT }} ${{ env.HOST }} "cat > ${{ env.DEPLOY_DIRECTORY }}/.env <<'EOF'
       - name: Build app
         run: |
           go mod download
@@ -48,6 +51,14 @@ jobs:
           rsync -avz -e 'ssh -i deploy_key.pem -o StrictHostKeyChecking=no' ./migrator ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}/migrator
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      - name: Install Redis
+        run: |
+          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "
+            sudo apt-get update && sudo apt-get install -y redis-server
+
+            sudo systemctl enable redis-server
+            sudo systemctl restart redis-server
+          "
       - name: Remove old systemd service file
         run: |
           ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "rm -f /etc/systemd/system/grpc-auth.service"
