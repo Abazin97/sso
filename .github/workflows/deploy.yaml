@@ -38,10 +38,10 @@ jobs:
       - name: Build app
         run: |
           go mod download
-          GOOS=linux GOARCH=arm64 go build -o grpc-auth ./cmd/sso
+          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -o grpc-auth ./cmd/sso
       - name: Build migrator
         run: |
-          GOOS=linux GOARCH=arm64 go build -o migrator ./cmd/migrator
+          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -o migrator ./cmd/migrator
       - name: Deploy to VM
         run: |
           sudo apt-get install -y ssh rsync
