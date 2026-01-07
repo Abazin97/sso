@@ -34,7 +34,7 @@ jobs:
           go-version: 1.24.0
 #      - name: Generate .env file
 #        run: |
-#          ssh -i deploy_key.pem -o StrictHostKeyChecking=no -p ${{ env.PORT }} ${{ env.HOST }} "cat > ${{ env.DEPLOY_DIRECTORY }}/.env <<'EOF'
+#          ssh -i grpc-auth.pem -o StrictHostKeyChecking=no -p ${{ env.PORT }} ${{ env.HOST }} "cat > ${{ env.DEPLOY_DIRECTORY }}/.env <<'EOF'
       - name: Build app
         run: |
           go mod download
@@ -45,34 +45,34 @@ jobs:
       - name: Deploy to VM
         run: |
           sudo apt-get install -y ssh rsync
-          echo "$DEPLOY_SSH_KEY" > deploy_key.pem
-          chmod 600 deploy_key.pem
-          ssh -i deploy_key.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
-          rsync -avz -e 'ssh -i deploy_key.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no' --exclude='.git' ./ ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}
-          rsync -avz -e 'ssh -i deploy_key.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no' ./migrator ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}/migrator
+          echo "$DEPLOY_SSH_KEY" > grpc-auth
+          chmod 600 grpc-auth.pem
+          ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
+          rsync -avz -e 'ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no' --exclude='.git' ./ ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}
+          rsync -avz -e 'ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no' ./migrator ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}/migrator
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
       - name: Install Redis
         run: |
-          ssh -i deploy_key.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "
+          ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "
             sudo apt-get update && sudo apt-get install -y redis-server
             sudo systemctl enable redis-server
             sudo systemctl restart redis-server
           "
       - name: Remove old systemd service file
         run: |
-          ssh -i deploy_key.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "rm -f /etc/systemd/system/grpc-auth.service"
+          ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "rm -f /etc/systemd/system/grpc-auth.service"
       - name: List workspace contents
         run: |
           echo "Listing deployment folder contents:"
           ls -la ${{ github.workspace }}/deployment
       - name: Copy systemd service file
         run: |
-          scp -i deploy_key.pem -P ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ github.workspace }}/deployment/grpc-auth.service ${{ env.HOST }}:/tmp/grpc-auth.service
-          ssh -i deploy_key.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "mv /tmp/grpc-auth.service /etc/systemd/system/grpc-auth.service"
+          scp -i grpc-auth -P ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ github.workspace }}/deployment/grpc-auth.service ${{ env.HOST }}:/tmp/grpc-auth.service
+          ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "mv /tmp/grpc-auth.service /etc/systemd/system/grpc-auth.service"
       - name: Run migrations
         run: |
-          ssh -i deploy_key.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "${{ env.DEPLOY_DIRECTORY }}/migrator --storage-path=${{ env.DEPLOY_DIRECTORY }}/sso.db --migrations-path=${{ env.DEPLOY_DIRECTORY }}/migrations"
+          ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "${{ env.DEPLOY_DIRECTORY }}/migrator --storage-path=${{ env.DEPLOY_DIRECTORY }}/sso.db --migrations-path=${{ env.DEPLOY_DIRECTORY }}/migrations"
       - name: Start application
         run: |
-          ssh -i deploy_key.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "systemctl daemon-reload && systemctl restart grpc-auth.service"
+          ssh -i grpc-auth -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "systemctl daemon-reload && systemctl restart grpc-auth.service"
