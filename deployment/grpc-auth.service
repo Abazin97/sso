@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 User=abz
-WorkingDirectory=/root/apps/grpc-auth
-ExecStart=/root/apps/grpc-auth/grpc-auth --config=/root/apps/grpc-auth/config/prod.yaml
+WorkingDirectory=/home/abz/apps/grpc-auth
+ExecStart=/home/abz/apps/grpc-auth/grpc-auth --config=/home/abz/apps/grpc-auth/config/prod.yaml
 Restart=always
 RestartSec=4
 StandardOutput=inherit
