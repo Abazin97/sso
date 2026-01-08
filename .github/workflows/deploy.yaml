@@ -28,20 +28,6 @@ jobs:
             echo "error: Tag '${{ github.event.inputs.tag }}' not found"
             exit 1
           fi
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.24.0
-#      - name: Generate .env file
-#        run: |
-#          ssh -i grpc-auth.pem -o StrictHostKeyChecking=no -p ${{ env.PORT }} ${{ env.HOST }} "cat > ${{ env.DEPLOY_DIRECTORY }}/.env <<'EOF'
-      - name: Build app
-        run: |
-          go mod download
-          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -o grpc-auth ./cmd/sso
-      - name: Build migrator
-        run: |
-          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 go build -o migrator ./cmd/migrator
       - name: Deploy to VM
         run: |
           sudo apt-get install -y ssh rsync
@@ -49,9 +35,20 @@ jobs:
           chmod 600 grpc-auth.pem
           ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
           rsync -avz -e 'ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no' --exclude='.git' ./ ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}
-          rsync -avz -e 'ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no' ./migrator ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}/migrator
+#          rsync -avz -e 'ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no' ./migrator ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}/migrator
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      - name: Build app on server
+        run: |
+          ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "
+            set -e
+            cd /home/abz/apps/grpc-auth-src
+
+            go mod download
+
+            go build -o /home/abz/apps/grpc-auth/grpc-auth ./cmd/sso
+            go build -o /home/abz/apps/grpc-auth/migrator ./cmd/migrator
+          "
       - name: Install Redis
         run: |
           ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "
@@ -75,4 +72,4 @@ jobs:
           ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "${{ env.DEPLOY_DIRECTORY }}/migrator --storage-path=${{ env.DEPLOY_DIRECTORY }}/sso.db --migrations-path=${{ env.DEPLOY_DIRECTORY }}/migrations"
       - name: Start application
         run: |
-          ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "sudo systemctl daemon-reload && systemctl restart grpc-auth.service"
+          ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "sudo systemctl daemon-reload && sudo systemctl restart grpc-auth.service"
