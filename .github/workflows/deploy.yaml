@@ -42,7 +42,7 @@ jobs:
         run: |
           ssh -i grpc-auth.pem -p ${{ env.SSH_PORT }} -o StrictHostKeyChecking=no ${{ env.HOST }} "
             set -e
-            cd /home/abz/apps/grpc-auth-src
+            cd /home/abz/apps/grpc-auth
 
             go mod download
 
