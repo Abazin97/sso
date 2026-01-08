@@ -44,10 +44,10 @@ jobs:
             set -e
             cd /home/abz/apps/grpc-auth
 
-            go mod download
+            /usr/local/go/bin/go mod download
 
-            go build -o /home/abz/apps/grpc-auth/grpc-auth ./cmd/sso
-            go build -o /home/abz/apps/grpc-auth/migrator ./cmd/migrator
+            /usr/local/go/bin/go build -o /home/abz/apps/grpc-auth/grpc-auth ./cmd/sso
+            /usr/local/go/bin/go build -o /home/abz/apps/grpc-auth/migrator ./cmd/migrator
           "
       - name: Install Redis
         run: |
