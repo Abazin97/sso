@@ -5,6 +5,7 @@ After=network.target
 [Service]
 User=abz
 WorkingDirectory=/home/abz/apps/grpc-auth
+EnvironmentFile=/home/abz/apps/grpc-auth/.env
 ExecStart=/home/abz/apps/grpc-auth/grpc-auth --config=/home/abz/apps/grpc-auth/config/prod.yaml
 Restart=always
 RestartSec=4
